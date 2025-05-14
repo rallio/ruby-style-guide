@@ -356,7 +356,7 @@ user&.zip&.upcase
 === Spaces and Braces [[spaces-braces]]
 
 No spaces after `(`, `[` or before `]`, `)`.
-Use spaces around `{` and before `}`.
+Use spaces after `{` and before `}`.
 
 [source,ruby]
 ----
@@ -366,7 +366,7 @@ some( arg ).other
 
 # good
 some(arg).other
-[1, 2, 3].each { |e| puts e }
+[1, 2, 3].each{ |e| puts e }
 ----
 
 `{` and `}` deserve a bit of clarification, since they are used for block and hash literals, as well as string interpolation.
@@ -477,13 +477,7 @@ when 1940..1950 then 'Bebop'
 else 'Jazz'
 end
 
-result = if some_cond
-  calc_something
-else
-  calc_something_else
-end
-
-# good - it's apparent what's going on
+# bad - wastes horizontal space, messier diffs when refactoring
 kind = case year
        when 1850..1889 then 'Blues'
        when 1890..1909 then 'Ragtime'
@@ -493,13 +487,14 @@ kind = case year
        else 'Jazz'
        end
 
+# bad - wastes horizontal space, messier diffs when refactoring
 result = if some_cond
            calc_something
          else
            calc_something_else
          end
 
-# good (and a bit more width efficient)
+# good - width-efficient
 kind =
   case year
   when 1850..1889 then 'Blues'
@@ -510,6 +505,14 @@ kind =
   else 'Jazz'
   end
 
+# good - readable, compact
+result = if some_cond
+  calc_something
+else
+  calc_something_else
+end
+
+# okay too, if the line is too long using the above style
 result =
   if some_cond
     calc_something
@@ -660,22 +663,28 @@ end
 
 === Trailing Comma in Method Arguments [[no-trailing-params-comma]]
 
-Avoid comma after the last parameter in a method call, especially when the parameters are not on separate lines.
+Avoid comma after the last parameter in a method call, unless the parameters are on separate lines.
 
 [source,ruby]
 ----
-# bad - easier to move/add/remove parameters, but still not preferred
+# bad
+some_method(size, count, color, )
+
+# good
+some_method(size, count, color)
+
+# good (for long lines0) - easier to move/add/remove parameters
 some_method(
   size,
   count,
   color,
 )
 
-# bad
-some_method(size, count, color, )
-
 # good
-some_method(size, count, color)
+some_method(
+  arg1: val1,
+  arg2: val2,
+)
 ----
 
 === Spaces around Equals [[spaces-around-equals]]
@@ -723,24 +732,6 @@ long_string = 'First part of the long string' \
 
 === Multi-line Method Chains [[consistent-multi-line-chains]]
 
-Adopt a consistent multi-line method chaining style.
-There are two popular styles in the Ruby community, both of which are considered good - leading `.`  and trailing `.`.
-
-==== Leading `.` [[leading-dot-in-multi-line-chains]]
-
-When continuing a chained method call on another line, keep the `.` on the second line.
-
-[source,ruby]
-----
-# bad - need to consult first line to understand second line
-one.two.three.
-  four
-
-# good - it's immediately clear what's going on the second line
-one.two.three
-  .four
-----
-
 ==== Trailing `.` [[trailing-dot-in-multi-line-chains]]
 
 When continuing a chained method call on another line, include the `.` on the first line to indicate that the expression continues.
@@ -760,8 +751,7 @@ A discussion on the merits of both alternative styles can be found https://githu
 
 === Method Arguments Alignment [[no-double-indent]]
 
-Align the arguments of a method call if they span more than one line.
-When aligning arguments is not appropriate due to line-length constraints, single indent for the lines after the first is also acceptable.
+For function calls that do not fit on one line, use single indent for the lines after the first.
 
 [source,ruby]
 ----
@@ -779,7 +769,7 @@ def send_mail(source)
       body: source.text)
 end
 
-# good
+# bad - width-inefficient
 def send_mail(source)
   Mailer.deliver(to: 'bob@example.com',
                  from: 'us@example.com',
@@ -793,7 +783,7 @@ def send_mail(source)
     to: 'bob@example.com',
     from: 'us@example.com',
     subject: 'Important message',
-    body: source.text
+    body: source.text,
   )
 end
 ----
@@ -861,7 +851,7 @@ collection[index_or_key]
 
 === Multi-line Arrays Alignment [[align-multiline-arrays]]
 
-Align the elements of array literals spanning multiple lines.
+Align the elements of array literals spanning multiple lines on a new indent level.
 
 [source,ruby]
 ----
@@ -869,16 +859,16 @@ Align the elements of array literals spanning multiple lines.
 menu_item = %w[Spam Spam Spam Spam Spam Spam Spam Spam
   Baked beans Spam Spam Spam Spam Spam]
 
+# bad
+menu_item =
+  %w[Spam Spam Spam Spam Spam Spam Spam Spam
+     Baked beans Spam Spam Spam Spam Spam]
+
 # good
 menu_item = %w[
   Spam Spam Spam Spam Spam Spam Spam Spam
   Baked beans Spam Spam Spam Spam Spam
 ]
-
-# good
-menu_item =
-  %w[Spam Spam Spam Spam Spam Spam Spam Spam
-     Baked beans Spam Spam Spam Spam Spam]
 ----
 
 == Naming Conventions
@@ -937,22 +927,11 @@ end
 
 === Identifiers with a Numeric Suffix [[snake-case-symbols-methods-vars-with-numbers]]
 
-Do not separate numbers from letters on symbols, methods and variables.
+Separate numbers from letters on symbols, methods and variables.
 
 [source,ruby]
 ----
 # bad
-:some_sym_1
-
-some_var_1 = 1
-
-var_10 = 10
-
-def some_method_1
-  # some code
-end
-
-# good
 :some_sym1
 
 some_var1 = 1
@@ -960,6 +939,17 @@ some_var1 = 1
 var10 = 10
 
 def some_method1
+  # some code
+end
+
+# good
+:some_sym_1
+
+some_var_1 = 1
+
+var_10 = 10
+
+def some_method_1
   # some code
 end
 ----
@@ -1569,11 +1559,11 @@ if some_condition
   do_something
 end
 
+# bad - confusing
+some_condition and do_something
+
 # good
 do_something if some_condition
-
-# another good option
-some_condition and do_something
 ----
 
 === Multi-line `if` Modifiers [[no-multiline-if-modifiers]]
@@ -1850,7 +1840,7 @@ if v = array.grep(/foo/)
   # some code
 end
 
-# good (MRI would still complain, but RuboCop won't)
+# good - preferred when v is only used within block
 if (v = array.grep(/foo/))
   do_something(v)
   # some code
@@ -1933,15 +1923,15 @@ end
 
 === `raise` vs `fail` [[prefer-raise-over-fail]]
 
-Prefer `raise` over `fail` for exceptions.
+Prefer `fail` when raising a new error; `raise` when re-raising in a `rescue` block.
 
 [source,ruby]
 ----
-# bad
+# good
 fail SomeException, 'message'
 
 # good
-raise SomeException, 'message'
+raise some_error
 ----
 
 === Raising Explicit `RuntimeError` [[no-explicit-runtimeerror]]
@@ -2054,6 +2044,9 @@ begin
 rescue SomeError
 end
 
+# bad - this will eat ALL errors
+do_something rescue nil
+
 # good
 begin
   do_something # an exception occurs here
@@ -2067,9 +2060,6 @@ begin
 rescue SomeError
   # Notes on why exception handling is not performed
 end
-
-# good
-do_something rescue nil
 ----
 
 === Using `rescue` as a Modifier [[no-rescue-modifiers]]
@@ -2836,12 +2826,6 @@ l.call(1)
 ----
 
 == Methods
-
-=== Short Methods [[short-methods]]
-
-Avoid methods longer than 10 LOC (lines of code).
-Ideally, most methods will be shorter than 5 LOC.
-Empty lines do not contribute to the relevant LOC.
 
 === Top-Level Methods
 
@@ -4241,22 +4225,22 @@ STATES = %i[draft open closed]
 
 === No Trailing Array Commas [[no-trailing-array-commas]]
 
-Avoid comma after the last item of an `Array` or `Hash` literal, especially when the items are not on separate lines.
+Avoid comma after the last item of an `Array` or `Hash` literal, except when the items are on separate lines.
 
 [source,ruby]
 ----
-# bad - easier to move/add/remove items, but still not preferred
-VALUES = [
-           1001,
-           2020,
-           3333,
-         ]
-
 # bad
 VALUES = [1001, 2020, 3333, ]
 
 # good
 VALUES = [1001, 2020, 3333]
+
+# good - easier to move/add/remove items
+VALUES = [
+  1001,
+  2020,
+  3333,
+]
 ----
 
 === No Gappy Arrays [[no-gappy-arrays]]
@@ -4442,7 +4426,7 @@ hash.value?(value)
 
 === `Hash#each` [[hash-each]]
 
-Use `Hash#each_key` instead of `Hash#keys.each` and `Hash#each_value` instead of `Hash#values.each`.
+Use `Hash#each_key` instead of `Hash#keys.each` and `Hash#each_value` instead of `Hash#values.each`, unless you need to iterate over key-value pairs.
 
 [source,ruby]
 ----
